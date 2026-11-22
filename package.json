@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Official Pushfa MCP server for installation guides, push notifications and service operations.",
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": { "node": ">=22" },
   "bin": { "pushfa-mcp": "src/index.mjs" },
   "files": ["src", "pushfa-mcp.mjs"],

@@ -74,4 +74,8 @@ MCP رسمی پوشفا برای خواندن راهنمای نصب وب، ان�
 
 بعد از تغییر کد در <code dir="ltr">src/</code>، با <code dir="ltr">npm ci</code> و سپس <code dir="ltr">npm run build</code> فایل یکپارچه را دوباره تولید کنید.
 
+## مجوز
+
+کد این مخزن با [مجوز MIT](LICENSE) منتشر می‌شود.
+
 </div>
