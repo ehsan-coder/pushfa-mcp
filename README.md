@@ -2,22 +2,24 @@
 
 MCP رسمی پوشفا برای خواندن راهنمای نصب وب، اندروید و iOS و کار با وب‌سرویس‌های یک سرویس پوشفا. روی سیستم شما با `stdio` اجرا می‌شود و برای دریافت راهنما و عملیات سرویس به `pushfa.com` متصل می‌شود.
 
-[صفحهٔ نصب و دانلود](https://pushfa.com/mcp) · [مستندات فنی MCP](https://pushfa.com/index/doc/mcp)
+[بسته در npm](https://www.npmjs.com/package/pushfa-mcp) · [صفحهٔ نصب و دانلود](https://pushfa.com/mcp) · [مستندات فنی MCP](https://pushfa.com/index/doc/mcp)
 
 ## نصب
 
-به Node.js نسخهٔ ۲۲ یا بالاتر و کلاینتی با پشتیبانی از MCP محلی نیاز دارید. برای نصب از همین مخزن، این تنظیم را در کلاینت‌های دارای قالب `mcpServers` وارد کنید.
+به Node.js نسخهٔ ۲۲ یا بالاتر و کلاینتی با پشتیبانی از MCP محلی نیاز دارید. برای اجرا از npm، این تنظیم را در کلاینت‌های دارای قالب `mcpServers` وارد کنید.
 
 ```json
 {
   "mcpServers": {
     "pushfa": {
       "command": "npx",
-      "args": ["--yes", "--package=git+https://github.com/ehsan-coder/pushfa-mcp.git", "pushfa-mcp"]
+      "args": ["-y", "pushfa-mcp"]
     }
   }
 }
 ```
+
+برای اجرا از GitHub، آرگومان‌ها را به `["--yes", "--package=git+https://github.com/ehsan-coder/pushfa-mcp.git", "pushfa-mcp"]` تغییر دهید.
 
 برای نصب دستی، [فایل یکپارچه](https://pushfa.com/downloads/pushfa-mcp.mjs) را بگیرید و در تنظیمات کلاینت، فرمان `node` و مسیر کامل فایل را وارد کنید. اگر مخزن را کلون یا ZIP آن را استخراج کرده‌اید، `node src/index.mjs` نیز از ریشهٔ پروژه اجرا می‌شود. اجرای کد به نصب وابستگی نیاز ندارد.
 
