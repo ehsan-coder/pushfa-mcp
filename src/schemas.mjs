@@ -154,7 +154,7 @@ function validateObject(value, schema, field) {
 }
 
 export {
-    isObject, uuidPattern, uuid, text, list, input, exactlyOne, string, bool, choice, integer, fcmToken,
+    isObject, uuidPattern, uuid, text, list, input, string, bool, choice, integer, fcmToken,
     deviceInput, topicId, groupInput, message, actions, reports, webhook, audience, aliasAudience,
     profileId, keyName, scalarMap, profileFields, ToolError, invalidArgument, validate,
 };

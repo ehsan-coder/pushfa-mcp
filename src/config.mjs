@@ -6,7 +6,6 @@ const enabled = {
     read: serviceConfigured,
     send: serviceConfigured && process.env.PUSHFA_MCP_ENABLE_SEND === 'true',
     manage: serviceConfigured && process.env.PUSHFA_MCP_ENABLE_MANAGEMENT === 'true',
-    identity: serviceConfigured && process.env.PUSHFA_MCP_ENABLE_IDENTITY === 'true',
 };
 
 export { apiUrl, publicKey, privateKey, enabled };

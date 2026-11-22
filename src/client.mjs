@@ -12,12 +12,12 @@ function unexpectedResponse(kind = 'read', httpStatus) {
     return new ToolError('MCP_API_UNAVAILABLE', 'Could not obtain a valid response from Pushfa.', details);
 }
 
-async function callApi(endpoint, payload, { method = 'POST', kind = 'read', raw } = {}) {
+async function callApi(endpoint, payload, { kind = 'read', raw } = {}) {
     let response;
     let result;
     try {
         response = await fetch(apiUrl + endpoint, {
-            method,
+            method: 'POST',
             headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...payload, api_public_key: publicKey, api_private_key: privateKey }),
             redirect: 'error',

@@ -3,7 +3,7 @@ import { enabled } from './config.mjs';
 import { confirmDraft, prepareDraft } from './drafts.mjs';
 import { guideUrls, readInstallationGuide } from './guides.mjs';
 import {
-    actions, aliasAudience, audience, bool, choice, deviceInput, exactlyOne, fcmToken, groupInput, input,
+    actions, aliasAudience, audience, bool, choice, deviceInput, fcmToken, groupInput, input,
     integer, isObject, keyName, list, message, profileFields, profileId, reports, scalarMap, string, text,
     topicId, uuid, uuidPattern, webhook,
 } from './schemas.mjs';
@@ -150,32 +150,6 @@ apiTool('prepare_record_retenx_event', 'retention/events', 'Record a RetenX even
     not: { required: ['subscriber_id', 'fcm_token'] },
 }, { kind: 'manage', raw: result => result.status === 'success' });
 
-apiTool('prepare_upsert_consumer_binding', 'consumer-bindings/upsert', 'Link a subscriber to a mobile number in Push Box.', input({
-    subscriber_id: profileId, mobile: string,
-}), { kind: 'identity', raw: result => Number.isInteger(result.binding_id) && typeof result.consumer_uuid === 'string' });
-apiTool('prepare_delete_consumer_binding', 'consumer-bindings', 'Revoke a Push Box binding by subscriber ID or all service bindings for one mobile number.', exactlyOne(input({
-    subscriber_id: profileId, mobile: string,
-}, []), 'subscriber_id', 'mobile'), { kind: 'identity', method: 'DELETE', raw: result => result.ok === true });
-apiTool('prepare_auth_push_bind', 'auth-push/bind', 'Bind a trusted subscriber device to an Auth Push identity.', input({
-    subscriber_id: uuid, auth_identity: text(191, 'Auth Push identity.'), expires_at: string,
-}, ['subscriber_id', 'auth_identity']), { kind: 'identity' });
-apiTool('prepare_auth_push_unbind', 'auth-push/unbind', 'Remove a subscriber’s trusted Auth Push binding.', input({
-    subscriber_id: uuid,
-}), { kind: 'identity' });
-apiTool('prepare_auth_push_challenge', 'auth-push/challenges', 'Create an approval or OTP challenge for an Auth Push identity. The client token is intended for the requesting device.', input({
-    auth_identity: text(191, 'Auth Push identity.'),
-    requester_subscriber_id: uuid,
-    mode: choice('approval', 'otp'),
-    expires_in: integer(60, 300),
-    reference: text(191, 'Application reference.'),
-    context: input({ ip: string, device: text(191, 'Device.'), location: text(191, 'Location.') }, []),
-}, ['auth_identity', 'requester_subscriber_id']), { kind: 'identity' });
-apiTool('prepare_auth_push_consume_grant', 'auth-push/grants/consume', 'Consume a verified Auth Push grant once.', input({
-    challenge_id: uuid,
-    grant: { type: 'string', pattern: '^[a-zA-Z0-9]{64}$' },
-    auth_identity: text(191, 'Auth Push identity.'),
-}), { kind: 'identity' });
-
 if (enabled.send) {
     tools.push({
         name: 'pushfa_send_notification',
@@ -186,22 +160,22 @@ if (enabled.send) {
     });
 }
 
-if (enabled.manage || enabled.identity) {
+if (enabled.manage) {
     tools.push({
-        name: 'pushfa_confirm_operation',
-        description: 'Execute a management or identity draft after the user explicitly approves it. Each draft permits one attempt.',
+        name: 'pushfa_confirm_management',
+        description: 'Execute a management draft after the user explicitly approves it. Each draft permits one attempt.',
         inputSchema: input({ draft_id: uuid }),
         annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },
-        run: ({ draft_id }) => confirmDraft(draft_id, ['manage', 'identity']),
+        run: ({ draft_id }) => confirmDraft(draft_id, ['manage']),
     });
 }
 
 function apiTool(name, endpoint, description, inputSchema, {
-    kind = 'read', method = 'POST', raw, project = asToolData,
+    kind = 'read', raw, project = asToolData,
 } = {}) {
     if (!enabled[kind]) return;
 
-    const operation = { endpoint, kind, method, raw, project };
+    const operation = { endpoint, kind, raw, project };
     const preparing = kind !== 'read';
     tools.push({
         name: `pushfa_${name}`,

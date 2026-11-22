@@ -8,7 +8,7 @@ import { tools } from './tools.mjs';
 
 const modernVersion = '2026-07-28';
 const legacyVersions = ['2025-11-25', '2025-06-18', '2025-03-26'];
-const serverInfo = { name: 'pushfa', title: 'Pushfa', version: '1.2.0' };
+const serverInfo = { name: 'pushfa', title: 'Pushfa', version: '2.0.0' };
 const capabilities = { tools: {} };
 const instructions = [
     'For a Pushfa installation or SDK upgrade, inspect the project and use pushfa_read_installation_guide to read the current guide for its platform before changing files. Read the relevant sections and adapt them to the existing integration. Keep private API keys, Firebase service accounts and APNs private keys out of client code.',

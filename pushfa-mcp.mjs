@@ -12,8 +12,7 @@ var serviceConfigured = Boolean(publicKey && privateKey);
 var enabled = {
   read: serviceConfigured,
   send: serviceConfigured && process.env.PUSHFA_MCP_ENABLE_SEND === "true",
-  manage: serviceConfigured && process.env.PUSHFA_MCP_ENABLE_MANAGEMENT === "true",
-  identity: serviceConfigured && process.env.PUSHFA_MCP_ENABLE_IDENTITY === "true"
+  manage: serviceConfigured && process.env.PUSHFA_MCP_ENABLE_MANAGEMENT === "true"
 };
 
 // src/schemas.mjs
@@ -186,12 +185,12 @@ function unexpectedResponse(kind = "read", httpStatus) {
   }
   return new ToolError("MCP_API_UNAVAILABLE", "Could not obtain a valid response from Pushfa.", details);
 }
-async function callApi(endpoint, payload, { method = "POST", kind = "read", raw } = {}) {
+async function callApi(endpoint, payload, { kind = "read", raw } = {}) {
   let response;
   let result;
   try {
     response = await fetch(apiUrl + endpoint, {
-      method,
+      method: "POST",
       headers: { Accept: "application/json", "Content-Type": "application/json" },
       body: JSON.stringify({ ...payload, api_public_key: publicKey, api_private_key: privateKey }),
       redirect: "error",
@@ -501,35 +500,6 @@ apiTool("prepare_record_retenx_event", "retention/events", "Record a RetenX even
   }, ["event_name"]),
   not: { required: ["subscriber_id", "fcm_token"] }
 }, { kind: "manage", raw: (result) => result.status === "success" });
-apiTool("prepare_upsert_consumer_binding", "consumer-bindings/upsert", "Link a subscriber to a mobile number in Push Box.", input({
-  subscriber_id: profileId,
-  mobile: string
-}), { kind: "identity", raw: (result) => Number.isInteger(result.binding_id) && typeof result.consumer_uuid === "string" });
-apiTool("prepare_delete_consumer_binding", "consumer-bindings", "Revoke a Push Box binding by subscriber ID or all service bindings for one mobile number.", exactlyOne(input({
-  subscriber_id: profileId,
-  mobile: string
-}, []), "subscriber_id", "mobile"), { kind: "identity", method: "DELETE", raw: (result) => result.ok === true });
-apiTool("prepare_auth_push_bind", "auth-push/bind", "Bind a trusted subscriber device to an Auth Push identity.", input({
-  subscriber_id: uuid,
-  auth_identity: text(191, "Auth Push identity."),
-  expires_at: string
-}, ["subscriber_id", "auth_identity"]), { kind: "identity" });
-apiTool("prepare_auth_push_unbind", "auth-push/unbind", "Remove a subscriber’s trusted Auth Push binding.", input({
-  subscriber_id: uuid
-}), { kind: "identity" });
-apiTool("prepare_auth_push_challenge", "auth-push/challenges", "Create an approval or OTP challenge for an Auth Push identity. The client token is intended for the requesting device.", input({
-  auth_identity: text(191, "Auth Push identity."),
-  requester_subscriber_id: uuid,
-  mode: choice("approval", "otp"),
-  expires_in: integer(60, 300),
-  reference: text(191, "Application reference."),
-  context: input({ ip: string, device: text(191, "Device."), location: text(191, "Location.") }, [])
-}, ["auth_identity", "requester_subscriber_id"]), { kind: "identity" });
-apiTool("prepare_auth_push_consume_grant", "auth-push/grants/consume", "Consume a verified Auth Push grant once.", input({
-  challenge_id: uuid,
-  grant: { type: "string", pattern: "^[a-zA-Z0-9]{64}$" },
-  auth_identity: text(191, "Auth Push identity.")
-}), { kind: "identity" });
 if (enabled.send) {
   tools.push({
     name: "pushfa_send_notification",
@@ -539,23 +509,22 @@ if (enabled.send) {
     run: ({ draft_id }) => confirmDraft(draft_id, ["send"])
   });
 }
-if (enabled.manage || enabled.identity) {
+if (enabled.manage) {
   tools.push({
-    name: "pushfa_confirm_operation",
-    description: "Execute a management or identity draft after the user explicitly approves it. Each draft permits one attempt.",
+    name: "pushfa_confirm_management",
+    description: "Execute a management draft after the user explicitly approves it. Each draft permits one attempt.",
     inputSchema: input({ draft_id: uuid }),
     annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },
-    run: ({ draft_id }) => confirmDraft(draft_id, ["manage", "identity"])
+    run: ({ draft_id }) => confirmDraft(draft_id, ["manage"])
   });
 }
 function apiTool(name, endpoint, description, inputSchema, {
   kind = "read",
-  method = "POST",
   raw,
   project = asToolData
 } = {}) {
   if (!enabled[kind]) return;
-  const operation = { endpoint, kind, method, raw, project };
+  const operation = { endpoint, kind, raw, project };
   const preparing = kind !== "read";
   tools.push({
     name: `pushfa_${name}`,
@@ -572,7 +541,7 @@ function asToolData(data) {
 // src/index.mjs
 var modernVersion = "2026-07-28";
 var legacyVersions = ["2025-11-25", "2025-06-18", "2025-03-26"];
-var serverInfo = { name: "pushfa", title: "Pushfa", version: "1.2.0" };
+var serverInfo = { name: "pushfa", title: "Pushfa", version: "2.0.0" };
 var capabilities = { tools: {} };
 var instructions = [
   "For a Pushfa installation or SDK upgrade, inspect the project and use pushfa_read_installation_guide to read the current guide for its platform before changing files. Read the relevant sections and adapt them to the existing integration. Keep private API keys, Firebase service accounts and APNs private keys out of client code.",
